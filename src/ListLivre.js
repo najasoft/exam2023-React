@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from 'react';
 
-const ListLivres = ({ adherent }) => {
+function ListLivres ()  {
   const [livres, setLivres] = useState([]);
-
-  useEffect(() => {
-    // Récupérer la liste des livres disponibles depuis l'API
-    fetch('/api/livres/disponibles')
+  const adherent = {id:9};
+  const loadData = () => {
+   
+    fetch("http://localhost:8080/livres")
       .then(response => response.json())
       .then(data => setLivres(data))
       .catch(error => console.log(error));
+  };
+
+  useEffect((livres) => {
+    loadData();
   }, []);
 
   const emprunterLivre = livreId => {
     // Effectuer une requête d'emprunt de livre à l'API
-    fetch(`/api/emprunts/emprunter?adherentId=${adherent.id}&livreId=${livreId}`, {
+    let emprunt={};
+    emprunt.livre={"id": livreId};
+    emprunt.adherent={"id": adherent.id};
+    fetch(`http://localhost:8080/emprunts`, {
       method: 'POST',
+      body: JSON.stringify(emprunt),
       headers: {
         'Content-Type': 'application/json'
       }
@@ -48,7 +56,7 @@ const ListLivres = ({ adherent }) => {
             <td>{livre.titre}</td>
             <td>{livre.prix}</td>
             <td>{livre.genre.nom}</td>
-            <td>{livre.auteurs.map(auteur => auteur.nom).join(', ')}</td>
+            <td><ul>{livre.auteurs.map(auteur => <li>{auteur.nom} </li>)}</ul></td>
             <td>
               <button onClick={() => emprunterLivre(livre.id)}>Emprunter</button>
             </td>
